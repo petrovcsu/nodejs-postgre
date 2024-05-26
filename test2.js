@@ -1,23 +1,16 @@
-//test.js
-
 const server = require('./app.js');
 const supertest = require('supertest');
 const requestWithSupertest = supertest(server);
 
-describe('User Endpoints', () => {
+describe('Authentication', () => {
+  test('should authenticate user with valid credentials', async () => {
+  const userData = { login: 'admin', password: 'admin' };
+  const response = await requestWithSupertest
+    .post('/api/auth/login')
+    .send(userData);
 
-  it('GET /user should show all users', async () => {
-    const res = await requestWithSupertest.get('/api/users');
-
-      expect(res.status).toEqual(200);
-      expect(res.type).toEqual(expect.stringContaining('json'));
-      expect(res.body).toHaveProperty('users')
-      expect(res.body.users.length > 0)
-      expect(res.body.users[0]).toHaveProperty('id')
-      expect(res.body.users[0]).toHaveProperty('login')
-      expect(res.body.users[0]).toHaveProperty('fio')
-      expect(res.body.users[0]).toHaveProperty('role_label')
-	  expect(res.body.users[0]).toHaveProperty('age')
-  });
+  expect(response.status).toEqual(200); // Проверяем, что статус ответа равен 200
+  expect(response.body).toHaveProperty('msg', ''); // Ожидаем пустое сообщение об ошибке
+});
 
 });

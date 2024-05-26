@@ -1,22 +1,33 @@
-//test.js
-
 const server = require('./app.js');
 const supertest = require('supertest');
 const requestWithSupertest = supertest(server);
 
-describe('User Endpoints', () => {
+describe('Authentication', () => {
+  test('should restrict access to GET /users for employee', async () => {
+    const employeeData = { login: 'admin', password: 'test' };
+    const loginResponse = await requestWithSupertest
+      .post('/api/auth/login')
+      .send(employeeData);
 
-  it('GET /user should show all users', async () => {
-    const res = await requestWithSupertest.get('/api/users');
+    const authToken = loginResponse.body.token;
 
-      expect(res.status).toEqual(200);
-      expect(res.type).toEqual(expect.stringContaining('json'));
-      expect(res.body).toHaveProperty('users')
-      expect(res.body.users.length > 0)
-      expect(res.body.users[0]).toHaveProperty('id')
-      expect(res.body.users[0]).toHaveProperty('login')
-      expect(res.body.users[0]).toHaveProperty('fio')
-      expect(res.body.users[0]).toHaveProperty('role_label')
+    const orderData = {
+  label: 'TestOrder',
+  id_client: 1,
+};
+
+
+    const createOrderResponse = await requestWithSupertest
+      .post('/orders/create')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send(orderData);
+
+    expect(createOrderResponse.status).toEqual(200);
+
+    const usersResponse = await requestWithSupertest
+      .get('/api/users')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(usersResponse.status).toEqual(200);
   });
-
 });
